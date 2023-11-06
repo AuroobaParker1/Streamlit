@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import openpyxl
 
 try:
     df = pd.read_excel('output.xlsx')
