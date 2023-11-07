@@ -30,6 +30,7 @@ if student_name:
                 new_col.iloc[i] = answer
                 df[student_name] = new_col
 
+            print(answer)
             df.to_excel('output.xlsx', index=False, engine='openpyxl')
 
    
