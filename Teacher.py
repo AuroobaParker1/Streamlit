@@ -1,9 +1,17 @@
 import streamlit as st
 import pandas as pd
+from github import Github
 
-# Load existing data from the Excel file, if any
+g = Github('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')
+
+
+repo = g.get_repo("AuroobaParker1/Streamlit")
+
+
+file = repo.get_contents("output.xlsx")
+
 try:
-    df = pd.read_excel('output.xlsx')
+    df = pd.read_excel('https://github.com/AuroobaParker1/Streamlit/blob/main/output.xlsx?raw=true')
 except FileNotFoundError:
     df = pd.DataFrame(columns=['Question', 'Markscheme 1', 'Markscheme 2'])
 
@@ -21,4 +29,9 @@ for i in range(num_sets):
         df = pd.concat([df,pd.DataFrame(new_data)], ignore_index=True)
 
         # Save the DataFrame to an Excel file
-        df.to_excel('output.xlsx', index=False)
+        df.to_excel('test.xlsx', index=False, engine='openpyxl')
+
+        with open('test.xlsx', 'rb') as file_content:
+            content = file_content.read()
+
+        repo.update_file(file.path, "Update from Streamlit", content, file.sha)
