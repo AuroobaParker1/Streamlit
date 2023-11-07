@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from github import Github
 
-g = Github('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')
+g = Github('AuroobaParker1','Aabathebest1')
 
 
 repo = g.get_repo("AuroobaParker1/Streamlit")
