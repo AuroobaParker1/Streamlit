@@ -1,9 +1,18 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
+from github import Github
+
+g = Github("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")
+
+
+repo = g.get_repo("AuroobaParker1/Streamlit")
+
+
+file = repo.get_contents("output.xlsx")
 
 try:
-    df = pd.read_excel('output.xlsx')
+    df = pd.read_excel(file)
 except FileNotFoundError:
     df = pd.DataFrame()
 
@@ -31,6 +40,6 @@ if student_name:
                 df[student_name] = new_col
 
             print(answer)
-            df.to_excel('output.xlsx', index=False, engine='openpyxl')
+            repo.update_file(file.path, "Update from Streamlit", df.to_excel('output.xlsx', index=False, engine='openpyxl').getValue(), file.sha)
 
    
