@@ -3,7 +3,7 @@ import pandas as pd
 import openpyxl
 from github import Github
 
-g = Github("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")
+g = Github('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')
 
 
 repo = g.get_repo("AuroobaParker1/Streamlit")
@@ -12,9 +12,10 @@ repo = g.get_repo("AuroobaParker1/Streamlit")
 file = repo.get_contents("output.xlsx")
 
 try:
-    df = pd.read_excel(file)
+    df = pd.read_excel('https://github.com/AuroobaParker1/Streamlit/blob/main/output.xlsx?raw=true')
 except FileNotFoundError:
     df = pd.DataFrame()
+print(df)
 
 questions = df['Question'].tolist()
 
@@ -40,6 +41,12 @@ if student_name:
                 df[student_name] = new_col
 
             print(answer)
-            repo.update_file(file.path, "Update from Streamlit", df.to_excel('output.xlsx', index=False, engine='openpyxl').getValue(), file.sha)
+
+            df.to_excel('test.xlsx', index=False, engine='openpyxl')
+
+            with open('test.xlsx', 'rb') as file_content:
+                content = file_content.read()
+
+            repo.update_file(file.path, "Update from Streamlit", content, file.sha)
 
    
