@@ -3,7 +3,7 @@ import pandas as pd
 import openpyxl
 from github import Github
 
-g = Github('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')
+g = Github('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')
 
 
 repo = g.get_repo("AuroobaParker1/Streamlit")
