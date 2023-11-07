@@ -8,10 +8,10 @@ g = Github('AuroobaParker1','Aabathebest1')
 repo = g.get_repo("AuroobaParker1/Streamlit")
 
 
-file = repo.get_contents("output.xlsx")
+file = repo.get_contents("output.csv")  # Assuming there's a CSV file named 'output.csv'
 
 try:
-    df = pd.read_excel('https://github.com/AuroobaParker1/Streamlit/blob/main/output.xlsx?raw=true')
+    df = pd.read_csv('https://github.com/AuroobaParker1/Streamlit/blob/main/output.csv?raw=true')
 except FileNotFoundError:
     df = pd.DataFrame(columns=['Question', 'Markscheme 1', 'Markscheme 2'])
 
@@ -28,10 +28,10 @@ for i in range(num_sets):
         new_data = {'Question': [question], 'Markscheme 1': [markscheme_1], 'Markscheme 2': [markscheme_2]}
         df = pd.concat([df,pd.DataFrame(new_data)], ignore_index=True)
 
-        # Save the DataFrame to an Excel file
-        df.to_excel('test.xlsx', index=False, engine='openpyxl')
+        # Save the DataFrame to a CSV file
+        df.to_csv('test.csv', index=False)
 
-        with open('test.xlsx', 'rb') as file_content:
+        with open('test.csv', 'rb') as file_content:
             content = file_content.read()
 
         repo.update_file(file.path, "Update from Streamlit", content, file.sha)
