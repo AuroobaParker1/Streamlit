@@ -29,9 +29,9 @@ for i in range(num_sets):
         df = pd.concat([df,pd.DataFrame(new_data)], ignore_index=True)
 
         # Save the DataFrame to an Excel file
-        df.to_excel('output.xlsx', index=False, engine='openpyxl')
+        df.to_excel('test.xlsx', index=False, engine='openpyxl')
 
-        with open('output.xlsx', 'rb') as file_content:
+        with open('test.xlsx', 'rb') as file_content:
             content = file_content.read()
 
         repo.update_file(file.path, "Update from Streamlit", content, file.sha)
