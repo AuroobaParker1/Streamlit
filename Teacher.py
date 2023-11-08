@@ -1,18 +1,29 @@
 import streamlit as st
 import pandas as pd
-from github import Github
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-g = Github('AuroobaParker1','Aabathebest1')
+# Authenticate with Google Drive
+scope = ['https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive']
+credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+gc = gspread.authorize(credentials)
 
-
-repo = g.get_repo("AuroobaParker1/Streamlit")
-
-
-file = repo.get_contents("output.csv")  # Assuming there's a CSV file named 'output.csv'
-
+# Try to open the Google Sheet
 try:
-    df = pd.read_csv('https://github.com/AuroobaParker1/Streamlit/blob/main/output.csv?raw=true')
-except FileNotFoundError:
+    sheet = gc.open('Data Gathered')
+except gspread.exceptions.SpreadsheetNotFound:
+    # If the sheet doesn't exist, create a new one
+    sheet = gc.create('Data Gathered')
+
+# Get the first worksheet
+worksheet = sheet.get_worksheet(0)
+
+# Read data from Google Sheets
+try:
+    df = pd.DataFrame(worksheet.get_all_records())
+    print("DAta",df)
+except gspread.exceptions.APIError:
     df = pd.DataFrame(columns=['Question', 'Markscheme 1', 'Markscheme 2'])
 
 num_sets = st.number_input('How many sets of inputs do you want to enter?', min_value=1, value=1)
@@ -22,16 +33,10 @@ for i in range(num_sets):
     question = st.text_area(f'Enter question for Set {i+1} here:', key=f'question_{i}')
     markscheme_1 = st.text_area(f'Enter markscheme 1 for Set {i+1} here:', key=f'markscheme_1_{i}')
     markscheme_2 = st.text_area(f'Enter markscheme 2 for Set {i+1} here:', key=f'markscheme_2_{i}')
-    # response = st.text_area(f'Enter response for Set {i+1} here:', key=f'response_{i}')
 
     if st.button(f'Submit Set {i+1}'):
         new_data = {'Question': [question], 'Markscheme 1': [markscheme_1], 'Markscheme 2': [markscheme_2]}
-        df = pd.concat([df,pd.DataFrame(new_data)], ignore_index=True)
+        df = pd.concat([df, pd.DataFrame(new_data)], ignore_index=True)
 
-        # Save the DataFrame to a CSV file
-        df.to_csv('test.csv', index=False)
-
-        with open('test.csv', 'rb') as file_content:
-            content = file_content.read()
-
-        repo.update_file(file.path, "Update from Streamlit", content, file.sha)
+        # Save the DataFrame to Google Sheets
+        worksheet.update([df.columns.values.tolist()] + df.values.tolist())

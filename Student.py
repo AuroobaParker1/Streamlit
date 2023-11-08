@@ -1,21 +1,30 @@
 import streamlit as st
 import pandas as pd
-import openpyxl
-from github import Github
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-g = Github('AuroobaParker1','Aabathebest1')
+# Authenticate with Google Drive
+scope = ['https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive']
+credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+gc = gspread.authorize(credentials)
 
-
-repo = g.get_repo("AuroobaParker1/Streamlit")
-
-
-file = repo.get_contents("output.xlsx")
-
+# Open the Google Sheet
 try:
-    df = pd.read_excel('https://github.com/AuroobaParker1/Streamlit/blob/main/output.xlsx?raw=true')
-except FileNotFoundError:
-    df = pd.DataFrame()
-print(df)
+    sheet = gc.open('Data Gathered')
+except gspread.exceptions.SpreadsheetNotFound:
+    # If the sheet doesn't exist, create a new one
+    sheet = gc.create('Data Gathered')
+
+# Get the first worksheet
+worksheet = sheet.get_worksheet(0)
+
+# Read data from Google Sheets
+try:
+    data = worksheet.get_all_records()
+    df = pd.DataFrame(data)
+except gspread.exceptions.APIError:
+    df = pd.DataFrame(columns=['Question'])
 
 questions = df['Question'].tolist()
 
@@ -24,7 +33,6 @@ students = df.columns.difference(['Question']).tolist()
 student_name = st.text_input('Enter your ERP:')
 
 if student_name:
-    
     for i, question in enumerate(questions):
         st.write(f"Question {i + 1}: {question}")
         answer = st.text_area(f'Enter your answer to Question {i + 1} here:', key=f'answer_{i}')
@@ -40,13 +48,5 @@ if student_name:
                 new_col.iloc[i] = answer
                 df[student_name] = new_col
 
-            print(answer)
-
-            df.to_excel('test.xlsx', index=False, engine='openpyxl')
-
-            with open('test.xlsx', 'rb') as file_content:
-                content = file_content.read()
-
-            repo.update_file(file.path, "Update from Streamlit", content, file.sha)
-
-   
+            # Save the DataFrame to Google Sheets
+            worksheet.update([df.columns.values.tolist()] + df.values.tolist())
